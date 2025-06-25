@@ -1,0 +1,48 @@
+name: Update Greek EPG
+
+on:
+  # Εκτελείται αυτόματα κάθε 6 ώρες (μπορείς να το αλλάξεις)
+  # Το cron format είναι: λεπτό ώρα ημέρα μήνας ημέρα_εβδομάδας
+  # '0 */6 * * *' σημαίνει "στο 0 λεπτό, κάθε 6 ώρες"
+  schedule:
+    - cron: '0 */6 * * *'
+  
+  # Επιτρέπει τη χειροκίνητη εκτέλεση από την καρτέλα "Actions" του GitHub
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. Κάνει checkout τον κώδικα του repository
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. Εγκαθιστά την Python
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+
+      # 3. Εγκαθιστά τις απαραίτητες βιβλιοθήκες (pytz)
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytz
+
+      # 4. Εκτελεί το script μετατροπής
+      - name: Convert EPG to Greek Time
+        env:
+          # Χρησιμοποιεί το GitHub Secret για ασφάλεια και ευελιξία
+          EPG_URL: ${{ secrets.EPG_URL }}
+        run: python convert_epg.py
+
+      # 5. Κάνει commit και push τις αλλαγές στο repository
+      - name: Commit and Push new EPG
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'chore: Αυτόματη ενημέρωση EPG με ώρα Ελλάδας'
+          file_pattern: 'epg_greece.xml' # Προσθέτει στο commit μόνο αυτό το αρχείο
+          commit_user_name: 'GitHub Actions Bot'
+          commit_user_email: 'actions@github.com'
+          commit_author: 'GitHub Actions Bot <actions@github.com>'
