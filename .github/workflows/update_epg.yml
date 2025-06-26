@@ -13,6 +13,12 @@ on:
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+
+     # --- ΠΡΟΣΘΕΣΕ ΑΥΤΟ ΤΟ BLOCK ΕΔΩ ---
+    permissions:
+      contents: write
+    # ------------------------------------
+    
     steps:
       # 1. Κάνει checkout τον κώδικα του repository
       - name: Checkout repository
